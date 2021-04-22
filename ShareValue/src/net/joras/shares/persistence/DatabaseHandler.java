@@ -57,6 +57,22 @@ public class DatabaseHandler {
 		
 	}
 
+	public void updatecomment(String wkn, String comment) throws SQLException {
+		
+		 // create our java preparedstatement using a sql update query
+	    PreparedStatement ps = connection.prepareStatement(
+	      "UPDATE sharevalues SET comment = ? WHERE wkn = ? ");
+
+	    // set the preparedstatement parameters
+	    ps.setString(1,comment);
+	    ps.setString(7,wkn);
+	    
+
+	    // call executeUpdate to execute our sql update statement
+	    ps.executeUpdate();
+	    ps.close();
+		
+	}
 
 	
 	

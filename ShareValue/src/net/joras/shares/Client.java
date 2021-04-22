@@ -159,7 +159,7 @@ public class Client {
 	    	int months = years * 12;
 	    	
 	    	if (sphr.getPriceEntriesCount() <= 399) {
-	    		throw new Exception("Zu wenige Monate für die Berechnung: " + sphr.getPriceEntriesCount());
+	    		dbh.updatecomment(wkn, "Zu wenige Monate für die Berechnung: " + sphr.getPriceEntriesCount());    		
 	    	}
 	    	
 	    	for (int i = 10; i > 1; i--) {
