@@ -104,6 +104,7 @@ public class Client {
 	   	for(int wknl = 0; wknl < wknList.size(); wknl++) {
 	    String wkn = wknList.get(wknl);
 	    
+	   // wkn = "A14U5Z"; 
 	    	
 	      	
 	     String exchange = "OTC";
@@ -189,10 +190,13 @@ public class Client {
 	    		
 	    		Double price = pricesAll.get(datum);
 	    		
-	    		while(price==null) {
-	    			cal.add(Calendar.DATE, 1);
-	    			datum = dateFormat.format(cal.getTime());
-	    			price = pricesAll.get(datum);   			
+	    		// wenn kurse fehlen, so lange weitergehen, bis nächster Kurs kommt
+	    		Calendar fallbackCalendar = (Calendar) cal.clone();
+	    		while(price==null) {	    		
+	    			fallbackCalendar.add(Calendar.DATE, 1);
+	    			String edatum = dateFormat.format(fallbackCalendar.getTime());
+	    			System.out.println(edatum);
+	    			price = pricesAll.get(edatum);   			
 	    		} 
 	    		
 	    		prices.add(price);
@@ -210,10 +214,10 @@ public class Client {
 	    	System.out.println("Zusammenfassung: ");
 	    	System.out.println("geoPAK"+years+": " + geopak);
 	    	System.out.println("Gewinnkonstanz: " + gk);
-	    	Double payield = geopak * gk / 100d;
+	    	
+	    	Double payield = yrc.payield(geopak, gk);
 	    	System.out.println("PA-Gewinn: " + payield);
-			
-			
+					
 			System.out.println("Verlustwahrscheinlichkeit: " + vw);	
 			System.out.println("gewichteter Durchschittsverlust: " + gDV);
 			Double vr = vw * gDV / 100d;

@@ -97,6 +97,21 @@ public class YieldRiskCalculator {
 		return gk.doubleValue();
 	}
 	
+	/**
+	 * PA-Gewinn
+	 * @param geopak
+	 * @param gk
+	 * @return
+	 */
+	public double payield(double geopak, double gk) {
+		
+		if (geopak >= 0) { // PA-Gewinn bei positiver Rendite rechnen	
+			return geopak * gk / 100d;
+		} else {// PA-Gewinn bei positiver Rendite rechnen
+			return geopak / gk * 100d;
+		}
+	}
+	
 	
 	/**
 	 * Verlustwahrscheinlichkeit
