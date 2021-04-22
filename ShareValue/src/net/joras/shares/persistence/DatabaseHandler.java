@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.joras.shares.ClientProperties;
+
 
 public class DatabaseHandler {
 	
@@ -21,8 +23,9 @@ public class DatabaseHandler {
 	public boolean connectToDatabase()  {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-			String connectionCommand = "jdbc:mysql://localhost:3306/ShareValue?user=sv&password=DianaMichi";
+			String connectionCommand = "jdbc:mysql://localhost:3306/ShareValue?user="+ClientProperties.getInstance().DBUSR+"&password="+ClientProperties.getInstance().DBPWD;
 			connection = DriverManager.getConnection(connectionCommand);
+			
 		;
 			return true;
 		} catch (Exception ex) {

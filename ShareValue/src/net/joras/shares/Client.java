@@ -32,7 +32,7 @@ public class Client {
 	    }
 	    File caFile = new File(args[0]); // <1>
 	    */
-	    File caFile = new File("/Users/michaeljoras/at/AT_Client/Key.pem"); // <1>
+	    File caFile = new File("/Users/michaeljoras/git/sharevalue/AT_Client/AT_Client/Key.pem"); // <1>
 	        
 	    if (!caFile.isFile()) { // <2>
 	      System.err.println("File: "+caFile+" does not exist");
@@ -45,7 +45,7 @@ public class Client {
 	    System.err.println("Connecting... "+server+":"+port);
 	    //try (TestClient client = new TestClient(server, port, caFile, args[1])) { // <4>
 	    
-	    try (TestClient client = new TestClient(server, port, caFile, "Diana+Michi")) { // <4>
+	    try (TestClient client = new TestClient(server, port, caFile, ClientProperties.getInstance().CCPWD)) { // <4>
 	        // end::initClass[]
 
 	      // Get trading accounts
