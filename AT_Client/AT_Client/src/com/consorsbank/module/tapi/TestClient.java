@@ -346,7 +346,7 @@ public class TestClient implements Closeable {
   // end::streamOrders[]
   
   // tag::streamDepotData[]
-  private void streamDepotData() {
+  public void streamDepotData() {
     TradingAccounts tradingAccounts = getTradingAccounts(); // <1>
     for (int accountIndex = 0; accountIndex<tradingAccounts.getAccountsCount(); accountIndex++) {
       TradingAccount account = tradingAccounts.getAccounts(accountIndex);
@@ -362,6 +362,9 @@ public class TestClient implements Closeable {
   }
   // end::streamDepotData[]
 
+  
+  
+  
   // tag::updateDepot[]
   private void updateDepot() {
     TradingAccounts tradingAccounts = getTradingAccounts();
@@ -825,7 +828,7 @@ public class TestClient implements Closeable {
   }
   
   // tag::getTradingAccounts[]
-  private TradingAccounts getTradingAccounts() {
+  public TradingAccounts getTradingAccounts() {
     AccessTokenRequest request = AccessTokenRequest.newBuilder()
         .setAccessToken(accessToken)
         .build();

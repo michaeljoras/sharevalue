@@ -9,9 +9,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.consorsbank.module.tapi.TestClient;
+import com.consorsbank.module.tapi.grpc.account.TradingAccount;
 import com.consorsbank.module.tapi.grpc.common.Timestamp;
 import com.consorsbank.module.tapi.grpc.security.PriceEntry;
+import com.consorsbank.module.tapi.grpc.security.SecurityCode;
 import com.consorsbank.module.tapi.grpc.security.SecurityCodeType;
 import com.consorsbank.module.tapi.grpc.security.SecurityPriceHistoryReply;
 import com.consorsbank.module.tapi.grpc.security.TimeResolution;
@@ -21,6 +26,9 @@ import net.joras.shares.persistence.DatabaseHandler;
 
 public class Client {
 
+	 private static final Logger logger = LogManager.getLogger(Client.class);
+	 
+	
 	 /**
 	   * Test client.
 	   */
@@ -35,21 +43,31 @@ public class Client {
 	    File caFile = new File("/Users/michaeljoras/git/sharevalue/AT_Client/AT_Client/Key.pem"); // <1>
 	        
 	    if (!caFile.isFile()) { // <2>
-	      System.err.println("File: "+caFile+" does not exist");
+	      logger.error("File: "+caFile+" does not exist");
 	      System.exit(-1);
 	    }
 	    
 	    String server = "localhost"; // <3>
 	    int port = 40443;
 
-	    System.err.println("Connecting... "+server+":"+port);
+	    logger.info("Connecting... "+server+":"+port);
 	    //try (TestClient client = new TestClient(server, port, caFile, args[1])) { // <4>
 	    
 	    try (TestClient client = new TestClient(server, port, caFile, ClientProperties.getInstance().CCPWD)) { // <4>
 	        // end::initClass[]
 
 	      // Get trading accounts
-	     // System.out.println(client.getTradingAccounts());
+	    	TradingAccount ta = client.getTradingAccounts().getAccounts(0); 
+	     logger.info(ta.toString());
+
+	    //	DepotEntries depotEntries = new DepotEntries(t);
+	    	
+	    	
+	      //client.streamDepotData();
+	      
+	      
+	      
+	      
 
 	      // Get stock exchanges
 	 //   System.err.println(client.getStockExchanges());
@@ -58,50 +76,18 @@ public class Client {
 	    //   System.out.println(client.requestSecurityInfo("710000", SecurityCodeType.WKN));
 	     
 	    	
-	    	
-	   //  String wkn = "577220"; // Fielmann
-	     //String wkn = "716460"; // SAP
-	    	// String wkn = "866197"; // Danaher
-	    	// String wkn = "A0YJQ2"; // Berkshire Hathaway B
-	    	// String wkn = "857209"; // Thermo Fisher
-	    //	 String wkn = "A0H1FP"; // FIS
-	    	 //String wkn = "A1J4U4"; // ASML    xxxxxxx
-	    //	String wkn = "CBK100"; // Commerzbank
-	    //  	String wkn = "906866"; // Amazon  	 
-	     // 	String wkn = "A0JM27"; // Constellation Software  	 
-	     // 	String wkn = "894648"; // Lockheed Martin 
-	    //	String wkn = "851745"; // 3M
-	    //	String wkn = "BAY001"; // Bayer
-	    	//String wkn = "723610"; // Siemens 
-	 //   	String wkn = "899744"; // Realty Income
-	   // 	String wkn = "A1JRLA"; // American Tower
-	    //	String wkn = "843002"; // MunichRe
-	    //	String wkn = "A1T7LU"; // T-Mobile US    xxxxx
-	    //	String wkn = "A14U5Z"; // Monster   xxxxxx
-	    //	String wkn = "659990"; // Merck
-	    //	String wkn = "A1ML7J"; // Vonovia
-	    //	String wkn = "850501"; // Bristol
-	    //	String wkn = "868402"; // Verizon
-	    //	String wkn = "A2PM3H"; // L3 Harris
-	    //	String wkn = "ZAL111"; // Zalando
-	   	//String wkn = "A0JMVJ"; // Pool
-	    //	String wkn = "A1KBYX"; // Zoetis
-	    	//String wkn = "766403"; // Volkswagen
-	    //	String wkn = "604700"; // Heidelberg Cement
-	    	//String wkn = "604840"; // Henkel
-	    //	String wkn = "925905"; // Cemex
-	  //  	String wkn = "855167"; // Roche
-	   // 	String wkn = "A1JTC1"; // Easyjet
 	  
-	   	//String wkn = "A0HGYF"; // Magforce
-	    //	String wkn = "A14KEB"; // Home24
-	     //  	String wkn = "A2YN90"; // Teamviewer
-	       	//String wkn = "A0EQ57"; // Helma
 	    	
 	    DatabaseHandler dbh = new DatabaseHandler();
+	    dbh.truncate();
 	    List<String> wknList = dbh.loadWKNList();
-	   	
-	   	for(int wknl = 0; wknl < wknList.size(); wknl++) {
+	    
+	    
+	    /* *******/
+	    
+	 for(int wknl = 0; wknl < wknList.size(); wknl++) {
+	 //  	for(int wknl = 0; wknl < -16; wknl++) {
+
 	    String wkn = wknList.get(wknl);
 	    
 	   // wkn = "A14U5Z"; 
@@ -153,7 +139,7 @@ public class Client {
 	    	/*    geopak  */
 	    	cal.add(Calendar.YEAR, -10);
 	    	
-	    	System.out.println("Kurs vor 10 Jahren: " + pricesAll.get(dateFormat.format(cal.getTime())));
+	    	logger.debug("Kurs vor 10 Jahren: " + pricesAll.get(dateFormat.format(cal.getTime())));
 	    	
 	    	/* Parameter bestimmen */
 	    	int years = 10;  // entspriche geopak in Jahren je nach Parametrisierung
@@ -180,7 +166,7 @@ public class Client {
 			einstand.add(pricesAll.get(dateFormat.format(cal.getTime())));
 			
 			Double geopak = yrc.geoPAK(pricesAll.get(dateFormat.format(yesterday)), einstand, years);
-			System.out.println("geoPAK"+years+": " + geopak);
+			logger.debug("geoPAK"+years+": " + geopak);
 			
 			/* Vorbereitung 120 Monatskurse  */
 			List<Double> prices = new ArrayList<>();
@@ -195,13 +181,13 @@ public class Client {
 	    		while(price==null) {	    		
 	    			fallbackCalendar.add(Calendar.DATE, 1);
 	    			String edatum = dateFormat.format(fallbackCalendar.getTime());
-	    			System.out.println(edatum);
+	    			logger.debug(edatum);
 	    			price = pricesAll.get(edatum);   			
 	    		} 
 	    		
 	    		prices.add(price);
 	    	
-	    		System.out.println("Kurs am " + datum + ": " + pricesAll.get(datum));
+	    		logger.debug("Kurs am " + datum + ": " + pricesAll.get(datum));
 	    		
 	    		cal.add(Calendar.MONTH, 1);
 	  		
@@ -211,22 +197,34 @@ public class Client {
 	    	Double vw =	yrc.vw(prices);
 	    	Double gDV = yrc.gDV(prices);
 	    	
-	    	System.out.println("Zusammenfassung: ");
-	    	System.out.println("geoPAK"+years+": " + geopak);
-	    	System.out.println("Gewinnkonstanz: " + gk);
+	    	logger.info("Zusammenfassung: ");
+	    	logger.info("geoPAK"+years+": " + geopak);
+	    	logger.info("Gewinnkonstanz: " + gk);
 	    	
 	    	Double payield = yrc.payield(geopak, gk);
-	    	System.out.println("PA-Gewinn: " + payield);
+	    	logger.info("PA-Gewinn: " + payield);
 					
-			System.out.println("Verlustwahrscheinlichkeit: " + vw);	
-			System.out.println("gewichteter Durchschittsverlust: " + gDV);
+	    	logger.info("Verlustwahrscheinlichkeit: " + vw);	
+	    	logger.info("gewichteter Durchschittsverlust: " + gDV);
 			Double vr = vw * gDV / 100d;
-			System.out.println("Verlust-Ratio: " + vr);
+			logger.info("Verlust-Ratio: " + vr);
 	    	
-	    	dbh.updateYielCalculation(wkn, client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getName(), 
+			// ISIN heraussuchen
+			String isin = "";
+			List<SecurityCode> scL = client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getSecurityCodesList();
+			
+			for(int gi = 0; gi < scL.size(); gi++) {
+				SecurityCode sce = scL.get(gi);
+				if (sce.getCodeType() == SecurityCodeType.ISIN) {
+					isin = sce.getCode();					
+				}
+			}
+			
+	    	dbh.updateYielCalculation(wkn, isin,
+	    			client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getName(), 
 	    			years, geopak, payield, gk, vr);
 	    	
-	    	System.out.println("Anzahl Kurse: " + sphr.getPriceEntriesCount());
+	    	logger.debug("Anzahl Kurse: " + sphr.getPriceEntriesCount());
 	    	
 	   	}
 	    	// System.out.println(client.getSecurityPriceHistory("710000", SecurityCodeType.WKN,"OTC", 5, TimeResolution.DAY));
@@ -257,7 +255,12 @@ public class Client {
 
 	      // ...
 
-	      
+	 //  	SecurityInfoReply sir = client.requestSecurityInfo("US0378331005", SecurityCodeType.ISIN);
+
+//	   	SecurityInfoReply sir = client.requestSecurityInfo("AXP", SecurityCodeType.MNEMONIC_US);	   	
+	//   	System.out.println(	   	sir.getName());
+	  // 	System.out.println(	   	sir.getSecurityCodesList().toString());
+	   	
 	      dbh.close();
 		   	
 	      

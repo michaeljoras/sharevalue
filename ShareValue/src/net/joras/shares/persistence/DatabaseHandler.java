@@ -9,10 +9,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import net.joras.shares.Client;
 import net.joras.shares.ClientProperties;
 
 
 public class DatabaseHandler {
+	
+	private static final Logger logger = LogManager.getLogger(DatabaseHandler.class);
 	
 	private static Connection connection;
 	
@@ -34,12 +40,12 @@ public class DatabaseHandler {
 		}
 	}
 	
-	public void updateYielCalculation(String wkn, String name, int geopakterm, double geopak, double payield, 
+	public void updateYielCalculation(String wkn, String isin, String name, int geopakterm, double geopak, double payield, 
 			double gk, double vr) throws SQLException {
 		
 		 // create our java preparedstatement using a sql update query
 	    PreparedStatement ps = connection.prepareStatement(
-	      "UPDATE sharevalues SET name = ?, geopakterm = ?, geopak = ?, payield = ?, gk = ?, vr = ? WHERE wkn = ? ");
+	      "UPDATE sharevalues SET name = ?, geopakterm = ?, geopak = ?, payield = ?, gk = ?, vr = ?, isin = ? WHERE wkn = ? ");
 
 	    // set the preparedstatement parameters
 	    ps.setString(1,name);
@@ -48,7 +54,8 @@ public class DatabaseHandler {
 	    ps.setDouble(4,payield);
 	    ps.setDouble(5,gk);
 	    ps.setDouble(6,vr);
-	    ps.setString(7,wkn);
+	    ps.setString(7,isin);
+	    ps.setString(8,wkn);
 	    
 
 	    // call executeUpdate to execute our sql update statement
@@ -57,6 +64,15 @@ public class DatabaseHandler {
 		
 	}
 
+	public void truncate() throws SQLException {
+		
+		PreparedStatement ps = connection.prepareStatement(
+			      "UPDATE sharevalues SET name = null, isin = null, geopakterm = null, geopak = null, payield = null, gk = null, vr = null ");
+		ps.executeUpdate();
+	    ps.close();
+		
+	}
+	
 	public void updatecomment(String wkn, String comment) throws SQLException {
 		
 		 // create our java preparedstatement using a sql update query
@@ -111,20 +127,19 @@ public class DatabaseHandler {
 		
 		
 		int columns = resultset.getMetaData().getColumnCount();
-        System.out.println("Alle Einträge zu den Personen ");
-        System.out.println();
+        logger.info("Alle Einträge zu den Personen ");
+        
         // Ich zeige die Tabellenspaltennamen an.
         for (int i = 1; i <= columns; i++)
-            System.out.print(resultset.getMetaData().getColumnLabel(i) + "\t\t");
-        System.out.println();
-        System.out.println();
+            logger.debug(resultset.getMetaData().getColumnLabel(i) + "\t\t");
+ 
         // Ich zeige den Inhalt der Tabelle an. Normaler Weise würde man die
         // Ergebnisse in eine Liste schreiben und diese zurück liefern.
         while (resultset.next()) {
             for (int i = 1; i <= columns; i++) {
-                System.out.print(resultset.getString(i) + "\t\t");
+                logger.debug(resultset.getString(i) + "\t\t");
             }
-            System.out.println();
+           
         }
         // Ich schließe die Streams wieder und gebe die Tabelle wieder frei.
         resultset.close();

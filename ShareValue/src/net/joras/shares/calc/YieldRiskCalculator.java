@@ -3,14 +3,21 @@ package net.joras.shares.calc;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import net.joras.shares.Client;
+
 public class YieldRiskCalculator {
 
+	private static final Logger logger = LogManager.getLogger(YieldRiskCalculator.class);
+	
 	public YieldRiskCalculator() {}
 	
 	public double geoPAK(double currentPrice, List<Double> entryPrice, int period) {
 		
 		double exp = 1d / period;
-		System.out.println("Zeitperiode: " + period + " Exponent: " + exp);
+		logger.debug("Zeitperiode: " + period + " Exponent: " + exp);
 		
 		// Einstandskurs berechnen
 		double sumEntryPrice = 0;
@@ -19,8 +26,8 @@ public class YieldRiskCalculator {
 		}
 		sumEntryPrice = sumEntryPrice / entryPrice.size();
 		
-		System.out.println("Einstandskurs: " + sumEntryPrice);		
-		System.out.println("Aktueller Kurs: " + currentPrice);
+		logger.debug("Einstandskurs: " + sumEntryPrice);		
+		logger.debug("Aktueller Kurs: " + currentPrice);
 		
 		return ((Math.pow(currentPrice / sumEntryPrice , exp)) -1d) * 100d;
 		
@@ -42,7 +49,7 @@ public class YieldRiskCalculator {
 		
 		// Äußere Schleife Spalten verrücken und I-1 rechnen
 		while(prices.size() >= 2) {
-			System.out.println("Schleifengröße: " + prices.size());
+			logger.debug("Schleifengröße: " + prices.size());
 			Double yield = 0d;		// Rendite
 			Double priceI = 0d;		// Preis Zeitpunkt I
 			Double priceIbef = 0d;	// 	preis Zeitpunkt I - 1
@@ -51,29 +58,29 @@ public class YieldRiskCalculator {
 			
 			// Innere Schleife Rendite pro Spalte berechnen
 			for(int i = 0; i < prices.size(); i++) {
-				System.out.println("I: " + i);
+				logger.debug("I: " + i);
 				priceI = prices.get(i); 
 				
 				if (i == 0) {
 					// Depotwert übertragen
 					currentValue = orgValue;
-					System.out.println("Depotwert: " + currentValue);
+					logger.debug("Depotwert: " + currentValue);
 					
 				} else {
 					// Preis I-1 berechnen
 					priceIbef = prices.get(i-1);
-					System.out.println("Preis I-1: " + priceIbef);
-					System.out.println("Preis I  : " + priceI);
+					logger.debug("Preis I-1: " + priceIbef);
+					logger.debug("Preis I  : " + priceI);
 					// Kursdifferenz berechnen
 					Double diffPercent = (priceI * 100 / priceIbef) - 100;
-					System.out.println("Prozentuale Kursdifferenz: " + diffPercent);
+					logger.debug("Prozentuale Kursdifferenz: " + diffPercent);
 					// Depotwert neu berechnen
 					currentValue += currentValue * diffPercent / 100d;
-					System.out.println("Depotwert: " + currentValue);
+					logger.debug("Depotwert: " + currentValue);
 					
 					// Rendite berechnen (= Gewinn / eingesetztes Kapital)				
 					yield = (currentValue - orgValue) / orgValue * 100d;
-					System.out.println("Rendite: " + yield);
+					logger.debug("Rendite: " + yield);
 				
 					// Count hochsetzen, da Rendite-Szenario
 					count++;
@@ -88,11 +95,11 @@ public class YieldRiskCalculator {
 			prices.remove(0);
 			
 		}
-		System.out.println("Count: " + count);
-		System.out.println("positive: " + positive);
+		logger.debug("Count: " + count);
+		logger.debug("positive: " + positive);
 		
 		Double gk = (new Double(positive) / new Double(count)) * 100d;
-		System.out.println("GK: " + gk);
+		logger.debug("GK: " + gk);
 				
 		return gk.doubleValue();
 	}
@@ -133,7 +140,7 @@ public class YieldRiskCalculator {
 				Double priceIbef = prices.get(i-1);	// 	preis Zeitpunkt I - 1
 				
 				if (priceIbef > priceI) {
-					System.out.println("PreisI-1: " + priceIbef + " PreisI: " + priceI);
+					logger.debug("PreisI-1: " + priceIbef + " PreisI: " + priceI);
 					negative++;
 				}
 				count++;
@@ -141,11 +148,11 @@ public class YieldRiskCalculator {
 		}
 			
 		
-		System.out.println("Count: " + count);
-		System.out.println("Negative: " + negative);
+		logger.debug("Count: " + count);
+		logger.debug("Negative: " + negative);
 		
 		Double vw = new Double(negative) / new Double(count) * 100d;
-		System.out.println("Verlustwahrscheinlichkeit: " + vw);
+		logger.debug("Verlustwahrscheinlichkeit: " + vw);
 		return vw.doubleValue();
 	}
 	
@@ -173,11 +180,11 @@ public class YieldRiskCalculator {
 				
 				if (priceIbef > priceI) {
 					//Zähler berechnen
-					System.out.println("PreisI-1: " + priceIbef + " PreisI: " + priceI);					
+					logger.debug("PreisI-1: " + priceIbef + " PreisI: " + priceI);					
 					Double ploss = (priceI * 100d / priceIbef) - 100d;
-					System.out.println("Verlust: " + ploss + " I: " + i);
+					logger.debug("Verlust: " + ploss + " I: " + i);
 					loss += Math.abs(ploss / 100d * i);
-					System.out.println("Verlust aufsummiert gewichtet: " + loss + " I: " + i);
+					logger.debug("Verlust aufsummiert gewichtet: " + loss + " I: " + i);
 					// Nenner hochzählen 
 					months += i;
 					
@@ -186,11 +193,11 @@ public class YieldRiskCalculator {
 		}
 			
 		
-		System.out.println("Zähler: " + loss);
-		System.out.println("Nenner: " + months);
+		logger.debug("Zähler: " + loss);
+		logger.debug("Nenner: " + months);
 		
 		Double gDV = loss / months * 100d;
-		System.out.println("gewichter Durchschnittsverlust: " + gDV);
+		logger.debug("gewichter Durchschnittsverlust: " + gDV);
 		return gDV.doubleValue();
 	}
 	
@@ -207,7 +214,7 @@ public class YieldRiskCalculator {
 		List<Double> einstand = new ArrayList<Double>();
 		einstand.add(60d );
 		
-		System.out.println(yrc.geoPAK(150, einstand, 10));
+		logger.debug(yrc.geoPAK(150, einstand, 10));
 		
 		/* ********************* */
 		
@@ -220,11 +227,11 @@ public class YieldRiskCalculator {
 		prices.add(43.4109375d);
 		
 		
-		System.out.println("GK: " + yrc.gk(prices));
+		logger.debug("GK: " + yrc.gk(prices));
 		
-		System.out.println("VW: " + yrc.vw(prices));
+		logger.debug("VW: " + yrc.vw(prices));
 		
-		System.out.println("gDV: " + yrc.gDV(prices));
+		logger.debug("gDV: " + yrc.gDV(prices));
 		
 		
 	}
