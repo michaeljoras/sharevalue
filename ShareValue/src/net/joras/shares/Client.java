@@ -164,9 +164,16 @@ public class Client {
 	       	
 	    	List<Double> einstand = new ArrayList<Double>(); // TODO: Einstand muss über 1 JAhr gerechnet werden
 			einstand.add(pricesAll.get(dateFormat.format(cal.getTime())));
+			Double geopak = 0d;
 			
-			Double geopak = yrc.geoPAK(pricesAll.get(dateFormat.format(yesterday)), einstand, years);
-			logger.debug("geoPAK"+years+": " + geopak);
+			try {
+			
+			    geopak = yrc.geoPAK(pricesAll.get(dateFormat.format(yesterday)), einstand, years);
+				logger.debug("geoPAK"+years+": " + geopak);
+			} catch(Exception e) {
+				 dbh.updatecomment(wkn, "Fehler: Geopak konnte nicht ermittelt werden");
+				 continue;
+				}
 			
 			/* Vorbereitung 120 Monatskurse  */
 			List<Double> prices = new ArrayList<>();

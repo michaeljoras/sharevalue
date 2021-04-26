@@ -81,7 +81,7 @@ public class DatabaseHandler {
 
 	    // set the preparedstatement parameters
 	    ps.setString(1,comment);
-	    ps.setString(7,wkn);
+	    ps.setString(2,wkn);
 	    
 
 	    // call executeUpdate to execute our sql update statement
@@ -146,8 +146,35 @@ public class DatabaseHandler {
         statement.close();
 		
 		
+	}
+	
+	public void insert(String wkn, String isin, String listing) throws SQLException {
 		
-		
+		 // create our java preparedstatement using a sql update query
+	    PreparedStatement ps = connection.prepareStatement(
+	    		"INSERT IGNORE INTO sharevalues (wkn, isin) VALUES (?,?)");
+	    // set the preparedstatement parameters
+	    ps.setString(1,wkn);
+	    ps.setString(2,isin);
+	        
+	    // call executeUpdate to execute our sql update statement
+	    ps.executeUpdate();
+	    
+	    // create our java preparedstatement using a sql update query
+	    PreparedStatement pslisting = connection.prepareStatement(
+	    		"INSERT IGNORE INTO sharelisting (wkn, listing) VALUES (?,?)");
+	    // set the preparedstatement parameters
+	    pslisting.setString(1,wkn);
+	    pslisting.setString(2,listing);
+	        
+
+	    // call executeUpdate to execute our sql update statement
+	    pslisting.executeUpdate();
+	    
+	    
+	    ps.close();
+		pslisting.close();
+	    
 	}
 	
 	
