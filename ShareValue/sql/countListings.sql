@@ -1,0 +1,1 @@
+select listing, count(*) from sharelisting group by listing;
