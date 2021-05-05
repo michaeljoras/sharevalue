@@ -34,7 +34,7 @@ public class Client {
 	   */
 	  public static void main(String[] args) throws Exception {
 		  
-		  boolean all = false;
+		  boolean all = true;
 		  
 	    /*if (args.length<2) {
 	      System.err.println("Please generate key in AT and "
@@ -175,16 +175,40 @@ public class Client {
 	    	}
 	    	
 	    	
-	    	// Renditeberechnungen starten
+	    	//////// Renditeberechnungen starten
 	    	
-	    	
-	       	
+ 	
 	    	List<Double> einstand = new ArrayList<Double>(); // TODO: Einstand muss über 1 JAhr gerechnet werden
 			einstand.add(pricesAll.get(dateFormat.format(cal.getTime())));
 			Double geopak = 0d;
 			
-			try {
+			// Einstand berechnen: Pro Jahr ein Monat
+			Calendar einstandDate = (Calendar) cal.clone();
+			for (int em = years; em > 0; em--){
+				einstandDate.add(Calendar.MONTH, 1);
+				
+				Double monatskurs = pricesAll.get(einstandDate);
+	    		
+	    		// wenn kurse fehlen, so lange weitergehen, bis nächster Kurs kommt
+	    		Calendar fallbackCalendar = (Calendar) cal.clone();
+	    		int trydays = 15; // 15 Tage ausprobieren, sonst abbrechen
+	    		while((monatskurs==null) && (trydays > 0)) {	    		
+	    			fallbackCalendar.add(Calendar.DATE, 1);
+	    			String edatum = dateFormat.format(fallbackCalendar.getTime());
+	    			logger.debug("Kein Preis für Einstand gefunden: " + edatum);
+	    			monatskurs = pricesAll.get(edatum);   	
+	    			trydays--;
+	    		} 
+	    		if (monatskurs != null) {
+	    			einstand.add(monatskurs);	    			
+	    		} else {
+	    			logger.info("Kein Kurs für Einstand gefunden");
+	    		}
+			}
+		
 			
+			try {
+				logger.info("Anzahl Kurse für Einstand: " + einstand.size());
 			    geopak = yrc.geoPAK(pricesAll.get(dateFormat.format(yesterday)), einstand, years);
 				logger.debug("geoPAK"+years+": " + geopak);
 			} catch(Exception e) {
@@ -205,7 +229,7 @@ public class Client {
 	    		while(price==null) {	    		
 	    			fallbackCalendar.add(Calendar.DATE, 1);
 	    			String edatum = dateFormat.format(fallbackCalendar.getTime());
-	    			logger.debug(edatum);
+	    			logger.debug("Kein Preis gefunden; " + edatum);
 	    			price = pricesAll.get(edatum);   			
 	    		} 
 	    		
