@@ -67,7 +67,7 @@ public class DatabaseHandler {
 	public void truncate() throws SQLException {
 		
 		PreparedStatement ps = connection.prepareStatement(
-			      "UPDATE sharevalues SET name = null, isin = null, geopakterm = null, geopak = null, payield = null, gk = null, vr = null ");
+			      "UPDATE sharevalues SET geopakterm = null, geopak = null, payield = null, gk = null, vr = null, comment = null");
 		ps.executeUpdate();
 	    ps.close();
 		
@@ -90,12 +90,35 @@ public class DatabaseHandler {
 		
 	}
 
+	public void updateName(String wkn, String isin, String name) throws SQLException {
+		
+		 // create our java preparedstatement using a sql update query
+	    PreparedStatement ps = connection.prepareStatement(
+	      "UPDATE sharevalues SET isin = ?, name = ? WHERE wkn = ? ");
+
+	    // set the preparedstatement parameters
+	    ps.setString(1,isin);
+	    ps.setString(2,name);
+	    ps.setString(3,wkn);
+	    
+
+	    // call executeUpdate to execute our sql update statement
+	    ps.executeUpdate();
+	    ps.close();
+		
+	}
 	
-	
-	public List<String> loadWKNList() throws SQLException {
+	public List<String> loadWKNList(boolean all) throws SQLException {
 		
 		Statement statement = connection.createStatement();
-		ResultSet resultset = statement.executeQuery("select wkn from sharevalues");
+		
+		ResultSet resultset = null;
+		
+		if(all) {
+			resultset = statement.executeQuery("select wkn from sharevalues");			
+		} else {
+			resultset = statement.executeQuery("select wkn from sharevalues where geopak is null");			
+		}
 		
 		List<String> wkn = new ArrayList<>();
 		
@@ -108,6 +131,28 @@ public class DatabaseHandler {
 		statement.close();
 		
 		return wkn;
+	}
+	
+	public String loadName(String wkn) throws SQLException {
+		
+		String name = "";
+		
+		PreparedStatement ps = connection.prepareStatement(
+			      "select name from sharevalues where wkn = ? ");
+
+			    // set the preparedstatement parameters
+			    ps.setString(1,wkn);
+		 
+			    ResultSet rs = ps.executeQuery();
+			    while ( rs.next() ) {
+	                name = rs.getString("name");
+	                
+	            }
+			    
+			    
+			    ps.close();
+			    
+		return name;
 	}
 	
 	public void close() {

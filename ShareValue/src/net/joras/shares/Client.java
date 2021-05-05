@@ -33,6 +33,9 @@ public class Client {
 	   * Test client.
 	   */
 	  public static void main(String[] args) throws Exception {
+		  
+		  boolean all = false;
+		  
 	    /*if (args.length<2) {
 	      System.err.println("Please generate key in AT and "
 	          + "put location of the trust certificate and secret as arguments");
@@ -79,8 +82,10 @@ public class Client {
 	  
 	    	
 	    DatabaseHandler dbh = new DatabaseHandler();
-	    dbh.truncate();
-	    List<String> wknList = dbh.loadWKNList();
+	    if (all)
+	    	dbh.truncate();
+	    
+	    List<String> wknList = dbh.loadWKNList(all);
 	    
 	    
 	    /* *******/
@@ -98,8 +103,8 @@ public class Client {
 	     
 	    	SecurityPriceHistoryReply sphr = client.getSecurityPriceHistory(wkn, SecurityCodeType.WKN,exchange, days, TimeResolution.DAY);
 	    	
-	    	System.out.println(client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getName());
-	    	System.out.println(exchange);
+	    	logger.info(client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getName());
+	    	logger.debug(exchange);
 	    	
 	    	DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 	    	
@@ -126,7 +131,7 @@ public class Client {
 	    		pricesAll.put(dateFormat.format(dat), pe.getClosePrice());
 	    		
 	    	}
-	    	System.out.println("Anzahl Kurse: " + sphr.getPriceEntriesCount());
+	    	logger.debug("Anzahl Kurse: " + sphr.getPriceEntriesCount());
 
 	        
 	    	YieldRiskCalculator yrc = new YieldRiskCalculator();
@@ -134,7 +139,19 @@ public class Client {
 	    	final Calendar cal = Calendar.getInstance();
 	    	cal.add(Calendar.DATE, -1);
 	    	Date yesterday = cal.getTime();
-	    	System.out.println("Kurs gestern: " + pricesAll.get( dateFormat.format(yesterday)));
+	    	
+	    	int yesterdaycount = 0;
+	    	while (pricesAll.get( dateFormat.format(yesterday)) == null && yesterdaycount < 10) {
+	    		logger.debug("Kurs gestern null, eins zurück");
+	    		cal.add(Calendar.DATE, -1);
+	    		yesterday = cal.getTime();
+	    		yesterdaycount++;
+	    	}
+	    	if (yesterdaycount >= 9) {
+	    		logger.warn("Kurs gestern nicht gefunden");	    		
+	    	}
+	    	
+	    	logger.debug("Kurs gestern: " + pricesAll.get( dateFormat.format(yesterday)));
 	    	
 	    	/*    geopak  */
 	    	cal.add(Calendar.YEAR, -10);
@@ -146,7 +163,7 @@ public class Client {
 	    	int months = years * 12;
 	    	
 	    	if (sphr.getPriceEntriesCount() <= 399) {
-	    		dbh.updatecomment(wkn, "Zu wenige Monate für die Berechnung: " + sphr.getPriceEntriesCount());    		
+	    		dbh.updatecomment(wkn, "Zu wenige Monate für die Berechnung: " + sphr.getPriceEntriesCount() + " yesterdaycount: " + yesterdaycount);    		
 	    	}
 	    	
 	    	for (int i = 10; i > 1; i--) {
@@ -171,9 +188,9 @@ public class Client {
 			    geopak = yrc.geoPAK(pricesAll.get(dateFormat.format(yesterday)), einstand, years);
 				logger.debug("geoPAK"+years+": " + geopak);
 			} catch(Exception e) {
-				 dbh.updatecomment(wkn, "Fehler: Geopak konnte nicht ermittelt werden");
+				 dbh.updatecomment(wkn, "Fehler: Geopak konnte nicht ermittelt werden, Anzahl Kurse " + sphr.getPriceEntriesCount());
 				 continue;
-				}
+			}	
 			
 			/* Vorbereitung 120 Monatskurse  */
 			List<Double> prices = new ArrayList<>();
@@ -230,8 +247,8 @@ public class Client {
 	    	dbh.updateYielCalculation(wkn, isin,
 	    			client.requestSecurityInfo(wkn, SecurityCodeType.WKN).getName(), 
 	    			years, geopak, payield, gk, vr);
-	    	
-	    	logger.debug("Anzahl Kurse: " + sphr.getPriceEntriesCount());
+		
+	    	logger.info("Anzahl Kurse: " + sphr.getPriceEntriesCount());
 	    	
 	   	}
 	    	// System.out.println(client.getSecurityPriceHistory("710000", SecurityCodeType.WKN,"OTC", 5, TimeResolution.DAY));

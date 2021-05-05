@@ -3,7 +3,6 @@ package net.joras.shares;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.Reader;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +20,8 @@ public class InsertListings {
 	 
 	  public static void main(String[] args) throws Exception {
 		  
-		  String filename = "sp500";
+		  String filename = "mdax";
+		  String type = "isin";
 		  
 		  File inputFile = new File("/Users/michaeljoras/git/sharevalue/ShareValue/listings/" + filename + ".txt");
 		  
@@ -45,20 +45,53 @@ public class InsertListings {
 		   
 		    	BufferedReader filereader = new BufferedReader(new FileReader(inputFile));
 		    	String line = filereader.readLine();
+		    	int count = 0;
 		    	while (line != null) {
 		    		logger.info(line); 		
-		    		logger.info(client.requestSecurityInfo(line, SecurityCodeType.ISIN).getName());
-		    		List<SecurityCode> scL = client.requestSecurityInfo(line, SecurityCodeType.ISIN).getSecurityCodesList();
-		    		for(int gi = 0; gi < scL.size(); gi++) {
-						SecurityCode sce = scL.get(gi);;
-						if (sce.getCodeType() == SecurityCodeType.WKN) {
-							logger.info(sce.getCode());	
-							dbh.insert(sce.getCode(), line, filename);
-						}
-					}
-		    		line = filereader.readLine();
-		    	}
-		    }
+		    		String swkn = "", sisin = ""; // wird für symbol benötigt
+		    		
+		    		if ("isin".equals(type.toLowerCase().trim())) {
+		    			logger.info(client.requestSecurityInfo(line.toUpperCase(), SecurityCodeType.ISIN).getName());
+		    			List<SecurityCode> scL = client.requestSecurityInfo(line.toUpperCase(), SecurityCodeType.ISIN).getSecurityCodesList();
+		    			for(int gi = 0; gi < scL.size(); gi++) {
+		    				SecurityCode sce = scL.get(gi);;
+		    				if (sce.getCodeType() == SecurityCodeType.WKN) {
+		    					logger.info(sce.getCode());	
+		    					dbh.insert(sce.getCode(), line.toUpperCase(), filename);
+		    				}
+		    			}		    			
+		    		} else if ("wkn".equals(type.toLowerCase().trim())) {
+		    			logger.info(client.requestSecurityInfo(line.toUpperCase(), SecurityCodeType.WKN).getName());
+		    			List<SecurityCode> scL = client.requestSecurityInfo(line.toUpperCase(), SecurityCodeType.WKN).getSecurityCodesList();
+		    			for(int gi = 0; gi < scL.size(); gi++) {
+		    				SecurityCode sce = scL.get(gi);;
+		    				if (sce.getCodeType() == SecurityCodeType.ISIN) {
+		    					logger.info(sce.getCode());	
+		    					dbh.insert(line.toUpperCase(), sce.getCode(), filename);
+		    				}
+		    			}		    			
+		    		} else if ("symbol".equals(type.toLowerCase().trim())) {
+	    			logger.info(client.requestSecurityInfo(line.toUpperCase().trim(), SecurityCodeType.MNEMONIC).getName());
+	    			List<SecurityCode> scL = client.requestSecurityInfo(line.toUpperCase().trim(), SecurityCodeType.MNEMONIC).getSecurityCodesList();
+	    			logger.info(scL.toString());
+	    			for(int gi = 0; gi < scL.size(); gi++) {
+	    				SecurityCode sce = scL.get(gi);;
+	    				if (sce.getCodeType() == SecurityCodeType.ISIN) {
+	    					logger.info(sce.getCode());	
+	    					sisin =  sce.getCode();
+	    				} else if (sce.getCodeType() == SecurityCodeType.WKN) {
+	    					logger.info(sce.getCode());	
+	    					swkn =  sce.getCode();
+	    				}
+	    			}		    			
+	    			dbh.insert(swkn, sisin, filename);
+	    		}
+		    		
+		    	line = filereader.readLine();
+		    	count++;
+		   	}
+		    logger.info("Anzahl Wertpapiere: " + count);	
+	  }
 		        // end::initClass[]
 		  		  
 	  }
