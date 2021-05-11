@@ -20,12 +20,13 @@ public class InsertListings {
 	 
 	  public static void main(String[] args) throws Exception {
 		  
-		  String filename = "mdax";
+		  String filename = "sp500";
 		  String type = "isin";
+		  
 		  
 		  File inputFile = new File("/Users/michaeljoras/git/sharevalue/ShareValue/listings/" + filename + ".txt");
 		  
-		    File caFile = new File("/Users/michaeljoras/git/sharevalue/AT_Client/AT_Client/Key.pem"); // <1>
+		    File caFile = new File(ClientProperties.getInstance().CAFILE); // <1>
 	        
 		    if (!caFile.isFile()) { // <2>
 		      logger.error("File: "+caFile+" does not exist");

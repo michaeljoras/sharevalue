@@ -12,13 +12,19 @@ public class ClientProperties {
 	public volatile String CCPWD = null;
 	public volatile String DBUSR = null;
 	public volatile String DBPWD = null;
+	public volatile String CAFILE = null;
+	
+	/* ------------- */
+	public volatile Boolean ALL = null;
+	
+	
 	
 	
 	private ClientProperties() {
 			
 		try {
 			//load a properties file from class path, inside static method
-			InputStream is = getClass().getClassLoader().getResourceAsStream("cred.properties");
+			InputStream is = getClass().getClassLoader().getResourceAsStream("client.properties");
 			credProp.load(is);
 						
 			doPreferences(credProp);
@@ -39,6 +45,8 @@ public class ClientProperties {
 		CCPWD = credProp.getProperty("CCpwd");
 		DBUSR = credProp.getProperty("DBusr");
 		DBPWD = credProp.getProperty("DBpwd");
+		CAFILE = credProp.getProperty("cafile");
+		ALL = Boolean.parseBoolean(credProp.getProperty("all"));
 	}
 	
 }

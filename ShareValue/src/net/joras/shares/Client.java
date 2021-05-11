@@ -34,16 +34,7 @@ public class Client {
 	   */
 	  public static void main(String[] args) throws Exception {
 		  
-		  boolean all = true;
-		  
-	    /*if (args.length<2) {
-	      System.err.println("Please generate key in AT and "
-	          + "put location of the trust certificate and secret as arguments");
-	      System.exit(-1);
-	    }
-	    File caFile = new File(args[0]); // <1>
-	    */
-	    File caFile = new File("/Users/michaeljoras/git/sharevalue/AT_Client/AT_Client/Key.pem"); // <1>
+	    File caFile = new File(ClientProperties.getInstance().CAFILE); // <1>
 	        
 	    if (!caFile.isFile()) { // <2>
 	      logger.error("File: "+caFile+" does not exist");
@@ -68,6 +59,7 @@ public class Client {
 	    	
 	      //client.streamDepotData();
 	      
+	     boolean all = ClientProperties.getInstance().ALL;
 	      
 	      
 	      
