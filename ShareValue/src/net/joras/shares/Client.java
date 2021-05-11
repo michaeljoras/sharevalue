@@ -170,7 +170,7 @@ public class Client {
 	    	//////// Renditeberechnungen starten
 	    	
  	
-	    	List<Double> einstand = new ArrayList<Double>(); // TODO: Einstand muss über 1 JAhr gerechnet werden
+	    	List<Double> einstand = new ArrayList<Double>(); // Einstand muss über 1 JAhr gerechnet werden
 			einstand.add(pricesAll.get(dateFormat.format(cal.getTime())));
 			Double geopak = 0d;
 			
